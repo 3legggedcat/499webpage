@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BraTS 2020 Project Overview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <p class="eyebrow">GitHub-Ready Project Webpage</p>
+      <h1>BraTS 2020 Brain Tumor Segmentation</h1>
+      <p class="hero-copy">
+        A static project page built from the repository contents: training commands, dataset facts,
+        preprocessing steps, and model details for the ResNet152 U-Net BraTS workflow.
+      </p>
+      <div class="hero-stats">
+        <article>
+          <span class="stat-value">369</span>
+          <span class="stat-label">training patients</span>
+        </article>
+        <article>
+          <span class="stat-value">125</span>
+          <span class="stat-label">validation patients</span>
+        </article>
+        <article>
+          <span class="stat-value">4</span>
+          <span class="stat-label">MRI modalities</span>
+        </article>
+        <article>
+          <span class="stat-value">256×256</span>
+          <span class="stat-label">model input size</span>
+        </article>
+      </div>
+    </header>
+
+    <main>
+      <section class="grid two-up">
+        <article class="card">
+          <p class="section-tag">Project Summary</p>
+          <h2>What this repository contains</h2>
+          <ul class="clean-list">
+            <li><code>train_resnet152_unet.py</code> for training a 4-channel U-Net with a ResNet152 encoder.</li>
+            <li><code>analyze_brats_project.py</code> for checkpoint-aware project analysis and Dice-style metrics.</li>
+            <li><code>generate_preprocessing_report.py</code> for preprocessing visuals and dataset summaries.</li>
+            <li>BraTS 2020 training and validation folders with NIfTI volumes and metadata CSV files.</li>
+          </ul>
+        </article>
+
+        <article class="card accent-card">
+          <p class="section-tag">Model Snapshot</p>
+          <h2>Training setup from the code</h2>
+          <ul class="clean-list">
+            <li>Architecture: U-Net from <code>segmentation-models-pytorch</code>.</li>
+            <li>Encoder: <code>resnet152</code> with default ImageNet weights.</li>
+            <li>Inputs: <code>t1</code>, <code>t1ce</code>, <code>t2</code>, and <code>flair</code>.</li>
+            <li>Classes: background, label 1, label 2, and label 4 remapped to class 3.</li>
+            <li>Training data indexing uses tumor-only slices when building the dataset.</li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="card wide-card">
+        <p class="section-tag">Dataset At A Glance</p>
+        <h2>Numbers pulled from the repository data</h2>
+        <div class="metrics-grid">
+          <article>
+            <span class="metric-number">368</span>
+            <span class="metric-text">training patient folders with segmentation masks</span>
+          </article>
+          <article>
+            <span class="metric-number">236</span>
+            <span class="metric-text">training survival metadata rows</span>
+          </article>
+          <article>
+            <span class="metric-number">29</span>
+            <span class="metric-text">validation survival evaluation rows</span>
+          </article>
+          <article>
+            <span class="metric-number">61.22</span>
+            <span class="metric-text">mean training age</span>
+          </article>
+          <article>
+            <span class="metric-number">445.45</span>
+            <span class="metric-text">mean survival days value parsed from training metadata</span>
+          </article>
+          <article>
+            <span class="metric-number">57.27</span>
+            <span class="metric-text">mean validation age</span>
+          </article>
+        </div>
+        <div class="split-note">
+          <div>
+            <h3>Training metadata</h3>
+            <p>Ages range from 18.98 to 86.65. Resection labels in <code>survival_info.csv</code>: 119 GTR, 10 STR, and 107 NA.</p>
+          </div>
+          <div>
+            <h3>Validation metadata</h3>
+            <p>Ages range from 21.73 to 85.68. All 29 validation rows in <code>survival_evaluation.csv</code> are labeled GTR.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid two-up">
+        <article class="card">
+          <p class="section-tag">Preprocessing</p>
+          <h2>What happens before training</h2>
+          <ol class="number-list">
+            <li>Load 3D NIfTI volumes for all four MRI modalities.</li>
+            <li>Normalize each volume using nonzero voxels only.</li>
+            <li>Select 2D slices and keep tumor-only slices for training.</li>
+            <li>Resize image slices to <code>256 × 256</code>.</li>
+            <li>Remap BraTS label <code>4</code> to project class <code>3</code>.</li>
+            <li>Convert masks to four-class one-hot tensors for segmentation loss.</li>
+          </ol>
+        </article>
+
+        <article class="card">
+          <p class="section-tag">Evaluation</p>
+          <h2>How results are reported</h2>
+          <p>
+            The analysis script looks for <code>resnet152_unet_brats2020.pt</code>. When that checkpoint exists,
+            it reports mean Dice loss and per-class hard Dice values for background, label 1, label 2,
+            and the remapped <code>label4_as_3</code> class.
+          </p>
+          <div class="callout">
+            <strong>Important:</strong> the repository documentation explicitly notes that BraTS label 4 is shown
+            as class 3 in project outputs.
+          </div>
+        </article>
+      </section>
+
+      <section class="card wide-card">
+        <p class="section-tag">How To Run</p>
+        <h2>Commands from the project instructions</h2>
+        <div class="command-grid">
+          <article class="command-card">
+            <h3>1. Create the environment</h3>
+            <pre><code>python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt</code></pre>
+          </article>
+          <article class="command-card">
+            <h3>2. Windows Git Bash activation</h3>
+            <pre><code>source .venv/Scripts/activate</code></pre>
+          </article>
+          <article class="command-card">
+            <h3>3. Small training run</h3>
+            <pre><code>python3 train_resnet152_unet.py --max-patients 1 --epochs 1 --batch-size 2 --num-workers 0</code></pre>
+          </article>
+          <article class="command-card">
+            <h3>4. Save the expected checkpoint name</h3>
+            <pre><code>python3 train_resnet152_unet.py --max-patients 2 --epochs 2 --output resnet152_unet_brats2020.pt</code></pre>
+          </article>
+          <article class="command-card">
+            <h3>5. Analyze the trained project</h3>
+            <pre><code>python3 analyze_brats_project.py</code></pre>
+          </article>
+          <article class="command-card">
+            <h3>6. Generate preprocessing visuals</h3>
+            <pre><code>python3 generate_preprocessing_report.py --max-analysis-patients 24</code></pre>
+          </article>
+        </div>
+      </section>
+
+      <section class="grid two-up">
+        <article class="card">
+          <p class="section-tag">Files</p>
+          <h2>Core assets in the repo</h2>
+          <ul class="clean-list">
+            <li><code>requirements.txt</code>: PyTorch, TorchVision, nibabel, segmentation-models-pytorch.</li>
+            <li><code>resnet152_unet_brats2020.pt</code>: saved model checkpoint included in the folder.</li>
+            <li><code>HOW_TO_RUN.md</code>: source for the run instructions used on this page.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <p class="section-tag">Publishing</p>
+          <h2>Use this as a GitHub page</h2>
+          <p>
+            This page is fully static. Open <code>index.html</code> directly in a browser, or push the folder to a
+            repository and publish it with GitHub Pages.
+          </p>
+        </article>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
